@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+     <color name="divider_grey">#8a8b86</color>
+    <color name="common_red">#bd081c</color>
+    <color name="common_red_light">#d2767c</color>
+    <color name="common_green">#029041</color>
+    <drawable name="common_red_text">#bd081c</drawable>
+    <drawable name="transparent">#00d2767c</drawable>
+    <drawable name="divider_music_list">#c5c4c2</drawable>
+    <color name="common_text_color">#2d2d2d</color>
+    <color name="grey_text_color">#2f2f2f</color>
+    <color name="grey_bg">#f2f2f2</color>
+    
+    <color name="common_divider">#8a8b86</color>
+<color name="dialog_common_divider">#dcdcdc</color>
+    <color name="album_header_date_text">#3d3d3d</color>
+
+    <color name="bg_bottom_screen_text_bar">#f8f8f8</color>
+
+    <color name="bg_photoView_tab" >#fbfbfb</color>
+    <color name="bg_photoView_inflate" >#ecebeb</color>
+    <color name="line_photoView_bottom_vertical" >#e3e3e3</color>
+    <color name="white" >#ffffff</color>
+    <color name="white_tranfer" >#66ffffff</color>
+    <color name="safe_low" >#d63a4b</color>
+    <color name="safe_midle" >#fec048</color>
+    <color name="safe_high" >#45cd7f</color>
+    <color name="send_code">#969696</color>
+
+</resources>

@@ -109,6 +109,7 @@ public class MonthPagerAdapter extends PagerAdapter {
 		int maxMonth = maxDate.getMonth();
 		//
 		mTotalCount = (maxYear - minYear) * 12 + maxMonth - minMonth;
+		System.out.println("mTotalCount:" + mTotalCount);
 	}
 
 	/**
@@ -178,15 +179,24 @@ public class MonthPagerAdapter extends PagerAdapter {
 	}
 
 
-	/**
-	 * @deprecated
-	 */
-	protected void removeOneMarker(int pagerPosition , String marker) {
+	protected void removeOneMarker(int pagerPosition, String marker) {
 		MonthView monthView = mViewCache.get(pagerPosition);
 		if (monthView == null) {
 			return;
 		}
-		monthView.removeOneMarkers(marker);
+		monthView.removeOneMarker(marker);
+	}
+
+
+	protected void addOneMarker(int pagerPosition, String marker) {
+		MonthView monthView = mViewCache.get(pagerPosition);
+		if (monthView == null) {
+			return;
+		}
+		monthView.addOneMarker(marker);
+	}
+	public int getMonthWeekByPosition(int position) {
+		return mViewCache.get(position).getCountWeekOfMonth();
 	}
 
 }

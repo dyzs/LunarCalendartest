@@ -1,7 +1,13 @@
 package com.coolerfall.widget.lunar;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.content.res.AssetManager;
+import android.database.DataSetObservable;
+import android.database.DataSetObserver;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -11,6 +17,8 @@ import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -46,6 +54,8 @@ public class MonthView extends View {
 	private final Region[][] mMonthWithFiveWeeks = new Region[5][DAYS_IN_WEEK];
 	private final Region[][] mMonthWithSixWeeks = new Region[6][DAYS_IN_WEEK];
 	private Paint mPaint;	// 定义画笔
+	private Paint mPaintRect;	// 矩形框的画笔
+
 
 
 	/**
@@ -72,6 +82,7 @@ public class MonthView extends View {
 		int dayHeightInFourWeek = (int) (h / 4f);
 		int dayHeightInFiveWeek = (int) (h / 5f);
 		int dayHeightInSixWeek = (int) (h / 6f);
+		System.out.println("hhhh===>" + h);
 
 		mCircleRadius = dayWidth / 2.2f;
 		mCircleMarkerRadius = dayWidth / 15.0f;
@@ -88,6 +99,7 @@ public class MonthView extends View {
 				solarHeight + lunarHeight) / 3f;
 		mMarkerOffset = mLunarOffset;	// maidou add
 
+
 		initMonthRegion(mMonthWithFourWeeks, dayWidth, dayHeightInFourWeek);
 		initMonthRegion(mMonthWithFiveWeeks, dayWidth, dayHeightInFiveWeek);
 		initMonthRegion(mMonthWithSixWeeks, dayWidth, dayHeightInSixWeek);
@@ -96,7 +108,16 @@ public class MonthView extends View {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		int measureWidth = MeasureSpec.getSize(widthMeasureSpec);
-		setMeasuredDimension(measureWidth, (int) (measureWidth * 6f / 7f));
+		int weeks = mMonth.getWeeksInMonth();
+		System.out.println("weeks:====" + weeks);
+		// 6f   5f
+		if (weeks == 4) {	// 当月只有在4周
+			setMeasuredDimension(measureWidth, (int) (measureWidth * 4f / 7f));
+		} else if (weeks == 5) {
+			setMeasuredDimension(measureWidth, (int) (measureWidth * 5f / 7f));
+		} else {
+			setMeasuredDimension(measureWidth, (int) (measureWidth * 6f / 7f));
+		}
 	}
 
 	@Override
@@ -114,12 +135,11 @@ public class MonthView extends View {
 		for (int i = 0; i < weeks; i++) {
 			for (int j = 0; j < DAYS_IN_WEEK; j++) {
 				draw(canvas, monthRegion[i][j].getBounds(), i, j);
+				canvas.drawRect(monthRegion[i][j].getBounds(), mPaintRect);
 			}
 		}
 
 		drawMarkersBackground(canvas);
-
-//		drawRectangle(canvas);
 
 		canvas.restore();
 	}
@@ -157,6 +177,10 @@ public class MonthView extends View {
 		mPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG | Paint.LINEAR_TEXT_FLAG);
 		mPaint.setTextAlign(Paint.Align.CENTER);
 
+		mPaintRect = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG | Paint.LINEAR_TEXT_FLAG);
+		mPaintRect.setStyle(Paint.Style.STROKE);//空心矩形框
+		mPaintRect.setColor(Color.GRAY);
+
 		if (mMonth.isMonthOfToday()) {
 			mSelectedIndex = mMonth.getIndexOfToday();
 		}
@@ -169,8 +193,12 @@ public class MonthView extends View {
 		for (int i = 0; i < monthRegion.length; i++) {
 			for (int j = 0; j < monthRegion[i].length; j++) {
 				Region region = new Region();
-				region.set(j * dayWidth, i * dayHeight, dayWidth +
-						j * dayWidth, dayWidth + i * dayHeight);
+				region.set(
+						j * dayWidth,
+						i * dayHeight,
+						dayWidth + j * dayWidth,
+						dayWidth + i * dayHeight
+				);
 				monthRegion[i][j] = region;
 			}
 		}
@@ -179,10 +207,11 @@ public class MonthView extends View {
 	/* get month region for current month */
 	private Region[][] getMonthRegion() {
 		int weeks = mMonth.getWeeksInMonth();
-		Region[][] monthRegion;
+		Region[][] monthRegion; // = mMonthWithSixWeeks;
 		if (weeks == 4) {	// 当月只有在4周
 			monthRegion = mMonthWithFourWeeks;
-		} else if (weeks == 5) {
+		}
+		else if (weeks == 5) {
 			monthRegion = mMonthWithFiveWeeks;
 		} else {
 			monthRegion = mMonthWithSixWeeks;
@@ -272,15 +301,6 @@ public class MonthView extends View {
 		mPaint.setColor(mLunarView.getMonthBackgroundColor());
 		canvas.drawCircle(rect.centerX(), rect.centerY(), mCircleRadius - 2, mPaint);
 	}
-	/* draw rect as background of all day*/
-	private void drawRectangle(Canvas canvas) {
-		mPaint.setStyle(Paint.Style.STROKE);//空心矩形框
-		mPaint.setColor(Color.MAGENTA);
-		canvas.drawRect(95, 70, 150, 150, mPaint);
-		mPaint.setStyle(Paint.Style.FILL);//实心矩形框
-//		mPaint.setColor(Color.GREEN);
-//		canvas.drawRect(100, 75, 145, 145, mPaint);
-	}
 
 	/* handle date click event 处理日期的点击事件*/
 	private void handleClickEvent(int x, int y) {
@@ -364,10 +384,21 @@ public class MonthView extends View {
 					MonthDay monthDay = mMonth.getMonthDay(i, j);
 					String cycleTime = transformMonthdayToString(monthDay);
 					if (marker.equals(cycleTime)) {
-						canvas.drawCircle(
-								monthRegion[i][j].getBounds().centerX() + mMarkerOffset,
-								monthRegion[i][j].getBounds().centerY() + mMarkerOffset - 6f,
-								mCircleMarkerRadius, mPaint);
+						// 不进行drawCircle，而是添加一个小星星
+//						canvas.drawCircle(
+//								monthRegion[i][j].getBounds().centerX() + mMarkerOffset,
+//								monthRegion[i][j].getBounds().centerY() + mMarkerOffset - 6f,
+//								mCircleMarkerRadius, mPaint);
+
+//						Bitmap bitmap = BitmapFactory.decodeResource(
+//								getContext().getResources(), R.drawable.);
+//						BitmapFactory.decodeFile("assets://pic.png");
+						canvas.drawBitmap(
+								getImageFromAssetsFile("pic.png"),
+								monthRegion[i][j].getBounds().centerX() - 35f,	// 负数往左
+								monthRegion[i][j].getBounds().centerY() - 15f,	// 负数往上
+								mPaint
+						);
 					}
 				}
 			}
@@ -387,10 +418,24 @@ public class MonthView extends View {
 //		int calcuteIndex = 0;
 	}
 
+	private Bitmap getImageFromAssetsFile(String fileName) {
+		Bitmap image = null;
+		AssetManager am = getResources().getAssets();
+		try {
+			InputStream is = am.open(fileName);
+			image = BitmapFactory.decodeStream(is);
+			is.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return image;
+	}
+
+
 	/**
-	 * @deprecated
+	 * 移除标记信息
 	 */
-	protected void removeOneMarkers(String marker) {
+	protected void removeOneMarker(String marker) {
 		if (mMarkersList != null) {
 			mMarkersList.remove(marker);
 		}
@@ -402,9 +447,6 @@ public class MonthView extends View {
 		invalidate();
 	}
 
-	protected void removeAllMarkers() {
-		mMarkersList = null;
-	}
 
 
 
@@ -419,7 +461,7 @@ public class MonthView extends View {
 //		canvas.drawRect(rect, mPaint);
 //		mPaint.setStyle(Paint.Style.FILL);//实心矩形框
 
-
+	// 单机和双击方法
 	private static long lastClickTime;
 	public static boolean isFastDoubleClick() {
 		long time = System.currentTimeMillis();
@@ -441,4 +483,12 @@ public class MonthView extends View {
 		return false;
 	}
 
+
+
+
+
+
+	public int getCountWeekOfMonth() {
+		return mMonth.getWeeksInMonth();
+	}
 }

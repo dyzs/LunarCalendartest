@@ -38,6 +38,7 @@ public class LunarView extends LinearLayout {
 	private WeekLabelView mWeekLabelView;				// 显示顶部的 week lable
 	private OnDatePickListener mOnDatePickListener;		// 日期选择监听
 	private boolean mIsChangedByUser;
+	private int mCurrentPager = 0;//1393;
 
 	public LunarView(Context context) {
 		this(context, null);
@@ -51,7 +52,7 @@ public class LunarView extends LinearLayout {
 		super(context, attrs, defStyleAttr);
 		init(attrs);
 	}
-
+	// TODO 修改 LunarView 的 MeasureHeight
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		int measureWidth = MeasureSpec.getSize(widthMeasureSpec);
@@ -66,7 +67,13 @@ public class LunarView extends LinearLayout {
 			child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
 		}
 
-		int measureHeight = (int) (measureWidth * 6f / 7f) + mWeekLabelView.getMeasuredHeight();
+		int countWeekOfMonth = mAdapter.getMonthWeekByPosition(mPager.getCurrentItem());
+		int measureHeight;// = (int) (measureWidth * 6f / 7f) + mWeekLabelView.getMeasuredHeight();
+		if (countWeekOfMonth == 6) {
+			measureHeight = (int) (measureWidth * 6f / 7f) + mWeekLabelView.getMeasuredHeight();
+		} else {
+			measureHeight = (int) (measureWidth * 5f / 7f) + mWeekLabelView.getMeasuredHeight();
+		}
 		setMeasuredDimension(measureWidth, measureHeight);
 	}
 
@@ -130,6 +137,7 @@ public class LunarView extends LinearLayout {
 
 		@Override
 		public void onPageSelected(int position) {
+			mCurrentPager = position;
 			mInterceptFirstTimeDatePick = true;
 			mAdapter.resetSelectedDay(position);
 		}
@@ -141,7 +149,7 @@ public class LunarView extends LinearLayout {
 	};
 
 	/**
-	 * modify by maidou
+	 * maidou modify
 	 * @param resId
 	 * @return
 	 */
@@ -478,15 +486,29 @@ public class LunarView extends LinearLayout {
 		return null;
 	}
 
-	private OnRefreshListener mOnRefreshListener;
-	public interface OnRefreshListener {void setOnRefresh();}
-	public void setOnRefreshListener (OnRefreshListener listener) {
-		mOnRefreshListener = listener;
+	/**
+	 * 移除一个日期的标记点
+	 * @param marker
+	 */
+	public void removeOneMarker(String marker) {
+		mAdapter.removeOneMarker(mCurrentPager,marker);
 	}
 
-	protected  void notifyMonthViewRefreshMarkers() {
-		if (mOnRefreshListener != null) {
-			mOnRefreshListener.setOnRefresh();
+	/**
+	 * 新增一个日期的标记点
+	 * @param marker
+	 */
+	public void addMarker(String marker) {
+		mAdapter.addOneMarker(mCurrentPager, marker);
+	}
+
+
+	/**
+	 * 移除所以日期的日程安排的方法
+	 */
+	public void removeAllMarkers(ArrayList<String> markers) {
+		for (String marker:markers) {
+			mAdapter.removeOneMarker(mAdapter.getIndexOfCurrentMonth(),marker);
 		}
 	}
 
@@ -499,12 +521,6 @@ public class LunarView extends LinearLayout {
 
 
 
-	/**
-	 * @deprecated
-	 */
-//	public void removeOneMarker(String marker) {
-//		mAdapter.removeOneMarker(mAdapter.getIndexOfCurrentMonth(),marker);
-//	}
 
 
 
@@ -525,5 +541,80 @@ public class LunarView extends LinearLayout {
 	public void setInterceptFirstTimeDatePick(boolean b) {
 		this.mInterceptFirstTimeDatePick = b;
 	}
+
+
+
+	// bak_code bak_code 	// bak_code bak_code
+
+	/**
+	 * =======================================================
+	 * showMonth(mAdapter.getIndexOfCurrentMonth(), today.get(Calendar.DAY_OF_MONTH));
+	 * 就可以解决绘制 marker背景
+	 * @menber markers 表示当前传递的是一个selectDay集合
+	 * create by author dyzs
+	 * =======================================================
+	 */
+//	private ArrayList<Integer> mMarkers = new ArrayList<>();
+//	private OnMarkerListener mOnMarkerListener;
+//	public void setOnMarkerListener(OnMarkerListener listener) {
+//		mOnMarkerListener = listener;
+//	}
+//	/**
+//	 * 定义回调接口，作为日期标志，提供初始化日历 markers
+//	 * Interface definition for a callback to be invoked when date marker.
+//	 */
+//	public interface OnMarkerListener {
+//		/**
+//		 * 初始化日期标记集，提供执行所有标志的重绘方法
+//		 */
+//		void onInitMarkers(LunarView view, ArrayList<MonthDay> monthDays);
+//
+//		/**
+//		 * 添加标志的方法
+//		 */
+//		void onAddMarker(LunarView view, MonthDay monthDay);
+//
+//		/**
+//		 * 移除一个指定的日志标志
+//		 */
+//		void onRemoveMarker(LunarView view, MonthDay monthDay);
+//
+//		/**
+//		 * 移除所有日志标志
+//		 */
+//		void onRemoveAllMarkers(LunarView view, ArrayList<MonthDay> monthDays);
+//	}
+//
+//	/**
+//	 * 提供给 MonthView 控件修改重绘当前 view 的调用方法
+//	 * @param monthDays
+//	 */
+//	protected void initMarkersListener(ArrayList<MonthDay> monthDays) {
+//		if (mOnMarkerListener != null) {
+//			mOnMarkerListener.onInitMarkers(this, monthDays);
+//		}
+//	}
+//
+//	/**
+//	 * 提供给 MonthView 控件修改重绘，当发生添加标志的时候
+//	 * @param monthDay
+//	 */
+//	protected void addMarker(MonthDay monthDay) {
+//		if (mOnMarkerListener != null) {
+//			mOnMarkerListener.onAddMarker(this, monthDay);
+//		}
+//	}
+//
+//	protected void removeMarker(MonthDay monthDay) {
+//		if (mOnMarkerListener != null) {
+//			mOnMarkerListener.onRemoveMarker(this, monthDay);
+//		}
+//	}
+//
+//	protected void removeAllMarkers(ArrayList<MonthDay> monthDays) {
+//		if (mOnMarkerListener != null) {
+//			mOnMarkerListener.onRemoveAllMarkers(this, monthDays);
+//		}
+//	}
 }
 

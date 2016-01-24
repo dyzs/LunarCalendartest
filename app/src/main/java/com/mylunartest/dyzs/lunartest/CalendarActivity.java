@@ -3,18 +3,12 @@ package com.mylunartest.dyzs.lunartest;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.SparseArray;
 import android.view.View;
-import android.view.animation.OvershootInterpolator;
 import android.widget.TextView;
 
 
 import com.coolerfall.widget.lunar.LunarView;
 import com.coolerfall.widget.lunar.MonthDay;
-import com.mylunartest.dyzs.lunartest.R;
-import com.nineoldandroids.view.ViewHelper;
-import com.nineoldandroids.view.ViewPropertyAnimator;
-
 
 import org.json.JSONObject;
 
@@ -60,6 +54,9 @@ public class CalendarActivity extends Activity implements View.OnClickListener{
         mMarkers.add("2016-01-04");
         mMarkers.add("2016-01-07");
         mMarkers.add("2016-01-09");
+        mMarkers.add("2016-02-09");
+        mMarkers.add("2016-02-15");
+        mMarkers.add("2016-02-22");
         initData();
     }
 

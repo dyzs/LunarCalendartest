@@ -3,7 +3,6 @@ package com.coolerfall.widget.lunar;
 import android.content.Context;
 import android.support.v4.util.SparseArrayCompat;
 import android.support.v4.view.PagerAdapter;
-import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.View;
 import android.view.ViewGroup;
@@ -107,9 +106,8 @@ public class MonthPagerAdapter extends PagerAdapter {
 		int minMonth = minDate.getMonth();
 		int maxYear = maxDate.getYear();
 		int maxMonth = maxDate.getMonth();
-		//
+
 		mTotalCount = (maxYear - minYear) * 12 + maxMonth - minMonth;
-		System.out.println("mTotalCount:" + mTotalCount);
 	}
 
 	/**
@@ -177,7 +175,6 @@ public class MonthPagerAdapter extends PagerAdapter {
 		calculateRange(minDate, maxDate);
 		notifyDataSetChanged();
 	}
-
 
 	protected void removeOneMarker(int pagerPosition, String marker) {
 		MonthView monthView = mViewCache.get(pagerPosition);

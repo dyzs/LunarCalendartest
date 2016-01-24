@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+
 /**
  * 这个类是一个用来展示日期的日历控件
  * This class is a calendar widget for displaying and selecting dates.
@@ -25,7 +26,7 @@ import java.util.Calendar;
  */
 public class LunarView extends LinearLayout {
 	private int mSolarTextColor = 0xff454545;			// 当前月份的日期的颜色，除了周六日以外
-	private int mLunarTextColor = Color.GRAY;			// 阴历文本颜色
+	private int mLunarTextColor = Color.GRAY;			// 农历文本颜色
 	private int mHightlistColor = 0xff03a9f4;			// 仅周六日日期字体颜色
 	private int mUncheckableColor = 0xffb0b0b0;			// 特殊节假日字体颜色，上月下月的字体颜色
 	private int mMonthBackgroundColor = 0xfffafafa;		// 日期面板背景颜色
@@ -52,7 +53,7 @@ public class LunarView extends LinearLayout {
 		super(context, attrs, defStyleAttr);
 		init(attrs);
 	}
-	// TODO 修改 LunarView 的 MeasureHeight
+
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		int measureWidth = MeasureSpec.getSize(widthMeasureSpec);
@@ -79,7 +80,7 @@ public class LunarView extends LinearLayout {
 
 	/* init lunar view */
 	private void init(AttributeSet attrs) {
-		System.out.println("Init LunarView......");
+		// System.out.println("Init LunarView......");
 		/* get custom attrs */
 		TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.LunarView);
 		mMonthBackgroundColor = a.getColor(R.styleable.LunarView_monthBackgroundColor, mMonthBackgroundColor);
@@ -137,6 +138,10 @@ public class LunarView extends LinearLayout {
 
 		@Override
 		public void onPageSelected(int position) {
+//			if (mIsChangedByUser) {
+//				mIsChangedByUser = false;
+//				return;
+//			}
 			mCurrentPager = position;
 			mInterceptFirstTimeDatePick = true;
 			mAdapter.resetSelectedDay(position);
@@ -371,6 +376,8 @@ public class LunarView extends LinearLayout {
 		mAdapter.setSelectedDay(position, selectedDay);
 		mPager.setCurrentItem(position, true);
 
+		// System.out.println("showMonth Page Position:" + position);
+
 		invalidate();
 	}
 
@@ -491,7 +498,7 @@ public class LunarView extends LinearLayout {
 	 * @param marker
 	 */
 	public void removeOneMarker(String marker) {
-		mAdapter.removeOneMarker(mCurrentPager,marker);
+		mAdapter.removeOneMarker(mCurrentPager, marker);
 	}
 
 	/**
@@ -511,20 +518,6 @@ public class LunarView extends LinearLayout {
 			mAdapter.removeOneMarker(mAdapter.getIndexOfCurrentMonth(),marker);
 		}
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

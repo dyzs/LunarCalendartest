@@ -1,11 +1,8 @@
 package com.coolerfall.widget.lunar;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.database.DataSetObservable;
-import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -55,8 +52,7 @@ public class MonthView extends View {
 	private final Region[][] mMonthWithSixWeeks = new Region[6][DAYS_IN_WEEK];
 	private Paint mPaint;	// 定义画笔
 	private Paint mPaintRect;	// 矩形框的画笔
-
-
+	private Paint mPaintDay;	// 当前日期的画笔
 
 	/**
 	 * 传递上下文，月份和农历控件
@@ -82,7 +78,6 @@ public class MonthView extends View {
 		int dayHeightInFourWeek = (int) (h / 4f);
 		int dayHeightInFiveWeek = (int) (h / 5f);
 		int dayHeightInSixWeek = (int) (h / 6f);
-		System.out.println("hhhh===>" + h);
 
 		mCircleRadius = dayWidth / 2.2f;
 		mCircleMarkerRadius = dayWidth / 15.0f;
@@ -99,7 +94,6 @@ public class MonthView extends View {
 				solarHeight + lunarHeight) / 3f;
 		mMarkerOffset = mLunarOffset;	// maidou add
 
-
 		initMonthRegion(mMonthWithFourWeeks, dayWidth, dayHeightInFourWeek);
 		initMonthRegion(mMonthWithFiveWeeks, dayWidth, dayHeightInFiveWeek);
 		initMonthRegion(mMonthWithSixWeeks, dayWidth, dayHeightInSixWeek);
@@ -109,7 +103,7 @@ public class MonthView extends View {
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		int measureWidth = MeasureSpec.getSize(widthMeasureSpec);
 		int weeks = mMonth.getWeeksInMonth();
-		System.out.println("weeks:====" + weeks);
+		// System.out.println("weeks:====" + weeks);
 		// 6f   5f
 		if (weeks == 4) {	// 当月只有在4周
 			setMeasuredDimension(measureWidth, (int) (measureWidth * 4f / 7f));
@@ -179,7 +173,12 @@ public class MonthView extends View {
 
 		mPaintRect = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG | Paint.LINEAR_TEXT_FLAG);
 		mPaintRect.setStyle(Paint.Style.STROKE);//空心矩形框
-		mPaintRect.setColor(Color.GRAY);
+		mPaintRect.setColor(0xffebebeb);
+		// 0xFF888888 Color.GREY
+
+		mPaintDay = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG | Paint.LINEAR_TEXT_FLAG);
+		mPaintDay.setTextAlign(Paint.Align.LEFT);
+
 
 		if (mMonth.isMonthOfToday()) {
 			mSelectedIndex = mMonth.getIndexOfToday();
@@ -203,15 +202,13 @@ public class MonthView extends View {
 			}
 		}
 	}
-	/* 计算当月的区域 */
-	/* get month region for current month */
+	/* get month region for current month 计算当月的区域 */
 	private Region[][] getMonthRegion() {
 		int weeks = mMonth.getWeeksInMonth();
 		Region[][] monthRegion; // = mMonthWithSixWeeks;
 		if (weeks == 4) {	// 当月只有在4周
 			monthRegion = mMonthWithFourWeeks;
-		}
-		else if (weeks == 5) {
+		} else if (weeks == 5) {
 			monthRegion = mMonthWithFiveWeeks;
 		} else {
 			monthRegion = mMonthWithSixWeeks;
@@ -220,8 +217,7 @@ public class MonthView extends View {
 		return monthRegion;
 	}
 
-	/* 画出所有的 text */
-	/* draw all the text in month view */
+	/* draw all the text in month view*/
 	private void draw(Canvas canvas, Rect rect, int xIndex, int yIndex) {
 		MonthDay monthDay = mMonth.getMonthDay(xIndex, yIndex);
 
@@ -229,8 +225,8 @@ public class MonthView extends View {
 		drawSolarText(canvas, rect, monthDay);
 		drawLunarText(canvas, rect, monthDay);
 	}
-	/* 画出阳历的 text */
-	/* draw solar text in month view */
+
+	/* draw solar text in month view 画出阳历的 text*/
 	private void drawSolarText(Canvas canvas, Rect rect, MonthDay monthDay) {
 		if (monthDay == null) {
 			return;
@@ -238,19 +234,22 @@ public class MonthView extends View {
 
 		if (!monthDay.isCheckable()) {
 			mPaint.setColor(mLunarView.getUnCheckableColor());		// 未选中的日期颜色
+			mPaintDay.setColor(mLunarView.getUnCheckableColor());		// 未选中的日期颜色
 		} else if (monthDay.isWeekend()) {
 			mPaint.setColor(mLunarView.getHightlightColor());
+			mPaintDay.setColor(mLunarView.getHightlightColor());
 		} else {
 			mPaint.setColor(mLunarView.getSolarTextColor());		// 得到阳历的文本颜色
+			mPaintDay.setColor(mLunarView.getSolarTextColor());		// 得到阳历的文本颜色
 		}
 
 		mPaint.setTextSize(mSolarTextSize);
+		mPaintDay.setTextSize(mSolarTextSize);
 		/* getSolarDay 返回当前日期的公历字符串 */
-		canvas.drawText(monthDay.getSolarDay(), rect.centerX(), rect.centerY(), mPaint);
+		canvas.drawText(monthDay.getSolarDay(), rect.centerX(), rect.centerY(), mPaintDay);
 	}
 
-	/* 绘制控件的农历文本 */
-	/* draw lunar text in month view */
+	/* draw lunar text in month view 绘制控件的农历文本*/
 	private void drawLunarText(Canvas canvas, Rect rect, MonthDay monthDay) {
 		if (monthDay == null) {
 			return;
@@ -281,7 +280,7 @@ public class MonthView extends View {
 			}
 			return;
 		}
-		/* not today was selected 绘制不是今天，但是是每个月的第一天  */
+		/* not today was selected 绘制不是今天，但是是每个月的第一天*/
 		if (mSelectedIndex == -1 && day.isFirstDay()) {
 			mSelectedIndex = xIndex * DAYS_IN_WEEK + yIndex;
 		}
@@ -300,6 +299,15 @@ public class MonthView extends View {
 		canvas.drawCircle(rect.centerX(), rect.centerY(), mCircleRadius, mPaint);
 		mPaint.setColor(mLunarView.getMonthBackgroundColor());
 		canvas.drawCircle(rect.centerX(), rect.centerY(), mCircleRadius - 2, mPaint);
+	}
+	/* draw rect as background of all day*/
+	private void drawRectangle(Canvas canvas) {
+		mPaint.setStyle(Paint.Style.STROKE);//空心矩形框
+		mPaint.setColor(Color.MAGENTA);
+		canvas.drawRect(95, 70, 150, 150, mPaint);
+		mPaint.setStyle(Paint.Style.FILL);//实心矩形框
+//		mPaint.setColor(Color.GREEN);
+//		canvas.drawRect(100, 75, 145, 145, mPaint);
 	}
 
 	/* handle date click event 处理日期的点击事件*/
@@ -482,11 +490,6 @@ public class MonthView extends View {
 		lastClickTime = time;
 		return false;
 	}
-
-
-
-
-
 
 	public int getCountWeekOfMonth() {
 		return mMonth.getWeeksInMonth();

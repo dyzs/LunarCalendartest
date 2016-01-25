@@ -46,10 +46,6 @@ public class CalendarActivity extends Activity implements View.OnClickListener{
 
 
         initView();
-//        mMarkers.add("2015-11-30");
-//        mMarkers.add("2015-12-16");
-//        mMarkers.add("2015-12-22");
-//        mMarkers.add("2015-09-21");
         mMarkers.add("2016-01-01");
         mMarkers.add("2016-01-04");
         mMarkers.add("2016-01-07");
@@ -63,7 +59,6 @@ public class CalendarActivity extends Activity implements View.OnClickListener{
 
     // 添加 marker
     private void initData() {
-        mLunarView.setOnMarkerListener(mMarkerListener);
         mLunarView.setOnDatePickListener(new LunarView.OnDatePickListener() {
             @Override
             public void onDatePick(LunarView view, MonthDay monthDay) {
@@ -120,36 +115,33 @@ public class CalendarActivity extends Activity implements View.OnClickListener{
             case R.id.iv_back:
                 finish();
                 break;
-            case R.id.tv_add:
-                if (mCurDate != null) {
-                    mLunarView.addMarker(mCurDate);
-                    System.out.println("add excetued");
-                } else {
-                    ToastUtil.makeText(mContext, "请选择日期");
-                }
-                break;
-            case R.id.tv_del:
-                if (mMarkers.contains(mCurDate)) {
-                    mMarkers.remove(mCurDate);
-                    mLunarView.removeOneMarker(mCurDate);
-                    ToastUtil.makeText(mContext, "成功删除：" + mCurDate);
-                } else {
-                    ToastUtil.makeText(mContext, "当前日期没有日程安排");
-                }
-                break;
-            case R.id.del_all:
-                ToastUtil.makeText(mContext, "删除全部");
-                mLunarView.removeAllMarkers(mMarkers);
-                mMarkers = null;
-                break;
+//            case R.id.tv_add:
+//                if (mCurDate != null) {
+//                    mLunarView.addMarker(mCurDate);
+//                    System.out.println("add excetued");
+//                } else {
+//                    ToastUtil.makeText(mContext, "请选择日期");
+//                }
+//                break;
+//            case R.id.tv_del:
+//                if (mMarkers.contains(mCurDate)) {
+//                    mMarkers.remove(mCurDate);
+//                    mLunarView.removeOneMarker(mCurDate);
+//                    ToastUtil.makeText(mContext, "成功删除：" + mCurDate);
+//                } else {
+//                    ToastUtil.makeText(mContext, "当前日期没有日程安排");
+//                }
+//                break;
+//            case R.id.del_all:
+//                ToastUtil.makeText(mContext, "删除全部");
+//                mLunarView.removeAllMarkers(mMarkers);
+//                mMarkers = null;
+//                break;
         }
     }
-
-    private MarkerListener mMarkerListener = new MarkerListener();
-    class MarkerListener implements LunarView.OnMarkerListener {
-        @Override
-        public ArrayList<String> getInitMarkers() {
-            return mMarkers;
-        }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mLunarView.setMarkerList(mMarkers);
     }
 }

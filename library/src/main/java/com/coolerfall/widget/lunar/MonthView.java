@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 import android.view.View;
@@ -32,6 +33,8 @@ public class MonthView extends View {
 	private static final int DAYS_IN_WEEK = 7;
 
 	private int mSelectedIndex = -1;
+	private int mMarkerIndex = -1;
+	private ArrayList<Integer> mMarkerIndexList;	// 保存 marker 的选中的那天
 
 	private float mSolarTextSize;
 	private float mLunarTextSize;
@@ -39,10 +42,10 @@ public class MonthView extends View {
 	private float mCircleRadius;	// 圆的半径，选择的日期的圆形样式
 	private float mCircleMarkerRadius;	// maidou add
 	private float mMarkerOffset;	// maidou add
-	private ArrayList<String> mMarkersList = null;	// maidou add
+	private ArrayList<String> mMarkersList;	// maidou add
 
 	private static final int LIGHT_GRAY = 0xffeaeaea;
-	private static final int MARKER_COLOR = 0xff03a9f4;//Color.MAGENTA; // maidou add
+	private static final int MARKER_COLOR = Color.MAGENTA; // add maidou
 
 	private Month mMonth;
 	private LunarView mLunarView;
@@ -53,6 +56,7 @@ public class MonthView extends View {
 	private Paint mPaint;	// 定义画笔
 	private Paint mPaintRect;	// 矩形框的画笔
 	private Paint mPaintDay;	// 当前日期的画笔
+	private Bitmap bitmapStar;	// 星星的bitmap对象
 
 	/**
 	 * 传递上下文，月份和农历控件
@@ -112,55 +116,48 @@ public class MonthView extends View {
 		} else {
 			setMeasuredDimension(measureWidth, (int) (measureWidth * 6f / 7f));
 		}
+		setMeasuredDimension(measureWidth, (int) (measureWidth * 6f / 7f));
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-
 		if (mMonth == null) {
 			return;
 		}
-
 		canvas.save();
 		int weeks = mMonth.getWeeksInMonth();
 		Region[][] monthRegion = getMonthRegion();
-
 		for (int i = 0; i < weeks; i++) {
 			for (int j = 0; j < DAYS_IN_WEEK; j++) {
 				draw(canvas, monthRegion[i][j].getBounds(), i, j);
-				canvas.drawRect(monthRegion[i][j].getBounds(), mPaintRect);
+				String cycleTime = transformMonthdayToString(mMonth.getMonthDay(i, j));
+				if (mMarkersList != null) {
+					if (mMarkersList.contains(cycleTime)) {
+						canvas.drawBitmap(
+								bitmapStar,
+								monthRegion[i][j].getBounds().centerX() - 35f,	// 负数往左
+								monthRegion[i][j].getBounds().centerY() - 15f,	// 负数往上
+								mPaint
+						);
+					}
+
+				}
 			}
 		}
 
-		drawMarkersBackground(canvas);
+		// drawMarkersBackground(canvas, weeks, monthRegion);
 
 		canvas.restore();
 	}
-	private long t1;
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
-				t1 = System.currentTimeMillis();
 				return true;
-//		case MotionEvent.ACTION_MOVE:
-//			System.out.println("ACTION_MOVE return false");
-//			getParent().requestDisallowInterceptTouchEvent(true);
-//			return false;
 			case MotionEvent.ACTION_UP:
-				long t2 = System.currentTimeMillis();
-				long duration = t2 - t1;
-				if (duration > 1000 && duration < 5000) {
-					System.out.println("长按了");
-
-					return true;
-				} else if (duration < 100){
-					System.out.println("单击了");
-					handleClickEvent((int) event.getX(), (int ) event.getY());
-					return true;
-				}
-				// notifyMarkerChange();
+				handleClickEvent((int) event.getX(), (int) event.getY());
+				return true;
 			default:
 				return super.onTouchEvent(event);
 		}
@@ -177,7 +174,9 @@ public class MonthView extends View {
 		// 0xFF888888 Color.GREY
 
 		mPaintDay = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG | Paint.LINEAR_TEXT_FLAG);
-		mPaintDay.setTextAlign(Paint.Align.LEFT);
+//		mPaintDay.setTypeface(Typeface.SERIF);
+		mPaintDay.setTextAlign(Paint.Align.CENTER);
+
 
 
 		if (mMonth.isMonthOfToday()) {
@@ -185,6 +184,8 @@ public class MonthView extends View {
 		}
 		// System.out.println("MonthView method init() getIndexOfToday mSelectedIndex:" + mSelectedIndex);
 		setBackgroundColor(mLunarView.getMonthBackgroundColor());
+		bitmapStar = getImageFromAssetsFile("pic.png");
+		mMarkersList = mLunarView.getMarkerList();
 	}
 
 	/* init month region with the width and height of day */
@@ -205,25 +206,24 @@ public class MonthView extends View {
 	/* get month region for current month 计算当月的区域 */
 	private Region[][] getMonthRegion() {
 		int weeks = mMonth.getWeeksInMonth();
-		Region[][] monthRegion; // = mMonthWithSixWeeks;
-		if (weeks == 4) {	// 当月只有在4周
-			monthRegion = mMonthWithFourWeeks;
-		} else if (weeks == 5) {
-			monthRegion = mMonthWithFiveWeeks;
-		} else {
-			monthRegion = mMonthWithSixWeeks;
-		}
-
+		Region[][] monthRegion = mMonthWithSixWeeks;
+//		if (weeks == 4) {	// 当月只有在4周
+//			monthRegion = mMonthWithFourWeeks;
+//		} else if (weeks == 5) {
+//			monthRegion = mMonthWithFiveWeeks;
+//		} else {
+//			monthRegion = mMonthWithSixWeeks;
+//		}
 		return monthRegion;
 	}
 
 	/* draw all the text in month view*/
 	private void draw(Canvas canvas, Rect rect, int xIndex, int yIndex) {
 		MonthDay monthDay = mMonth.getMonthDay(xIndex, yIndex);
-
 		drawBackground(canvas, rect, monthDay, xIndex, yIndex);
 		drawSolarText(canvas, rect, monthDay);
 		drawLunarText(canvas, rect, monthDay);
+		drawRectangle(canvas, rect);
 	}
 
 	/* draw solar text in month view 画出阳历的 text*/
@@ -231,10 +231,9 @@ public class MonthView extends View {
 		if (monthDay == null) {
 			return;
 		}
-
 		if (!monthDay.isCheckable()) {
 			mPaint.setColor(mLunarView.getUnCheckableColor());		// 未选中的日期颜色
-			mPaintDay.setColor(mLunarView.getUnCheckableColor());		// 未选中的日期颜色
+			mPaintDay.setColor(mLunarView.getUnCheckableColor());	// 未选中的日期颜色
 		} else if (monthDay.isWeekend()) {
 			mPaint.setColor(mLunarView.getHightlightColor());
 			mPaintDay.setColor(mLunarView.getHightlightColor());
@@ -301,13 +300,8 @@ public class MonthView extends View {
 		canvas.drawCircle(rect.centerX(), rect.centerY(), mCircleRadius - 2, mPaint);
 	}
 	/* draw rect as background of all day*/
-	private void drawRectangle(Canvas canvas) {
-		mPaint.setStyle(Paint.Style.STROKE);//空心矩形框
-		mPaint.setColor(Color.MAGENTA);
-		canvas.drawRect(95, 70, 150, 150, mPaint);
-		mPaint.setStyle(Paint.Style.FILL);//实心矩形框
-//		mPaint.setColor(Color.GREEN);
-//		canvas.drawRect(100, 75, 145, 145, mPaint);
+	private void drawRectangle(Canvas canvas, Rect rect) {
+		canvas.drawRect(rect, mPaintRect);
 	}
 
 	/* handle date click event 处理日期的点击事件*/
@@ -319,7 +313,6 @@ public class MonthView extends View {
 				if (!region.contains(x, y)) {
 					continue;
 				}
-
 				MonthDay monthDay = mMonth.getMonthDay(i, j);
 				if (monthDay == null) {
 					return;
@@ -373,57 +366,48 @@ public class MonthView extends View {
 		}
 	}
 
+	protected void setMarkerDay(int day) {
+		mMarkerIndex = mMonth.getIndexOfDayInCurMonth(day);
+		System.out.println("mMarkerIndex:" + mMarkerIndex);
+		invalidate();
+	}
+
+
 	/**
 	 * maidou add
 	 * 绘制marker日期的背景,Month.getIndexOfDayInCurMonth
 	 */
-	private void drawMarkersBackground(Canvas canvas) {
-		mPaint.setColor(MARKER_COLOR);
-//		mMarkersList = new ArrayList<>();
-		mMarkersList = mLunarView.getInitMarkersByListener();
-		if (mMarkersList == null) {
-			return;
-		}
-		for (String marker : mMarkersList) {
-			int weeks = mMonth.getWeeksInMonth();
-			Region[][] monthRegion = getMonthRegion();
-			for (int i = 0; i < weeks; i++) {
-				for (int j = 0; j < DAYS_IN_WEEK; j++) {
-					MonthDay monthDay = mMonth.getMonthDay(i, j);
-					String cycleTime = transformMonthdayToString(monthDay);
-					if (marker.equals(cycleTime)) {
-						// 不进行drawCircle，而是添加一个小星星
-//						canvas.drawCircle(
-//								monthRegion[i][j].getBounds().centerX() + mMarkerOffset,
-//								monthRegion[i][j].getBounds().centerY() + mMarkerOffset - 6f,
-//								mCircleMarkerRadius, mPaint);
-
-//						Bitmap bitmap = BitmapFactory.decodeResource(
-//								getContext().getResources(), R.drawable.);
-//						BitmapFactory.decodeFile("assets://pic.png");
-						canvas.drawBitmap(
-								getImageFromAssetsFile("pic.png"),
-								monthRegion[i][j].getBounds().centerX() - 35f,	// 负数往左
-								monthRegion[i][j].getBounds().centerY() - 15f,	// 负数往上
-								mPaint
-						);
+	private void drawMarkersBackground(Canvas canvas, int weeks, Region[][] monthRegion) {
+//		if (mMarkerIndex == (xIndex * DAYS_IN_WEEK + yIndex)) {
+//			canvas.drawBitmap(
+//					getImageFromAssetsFile("pic.png"),
+//					rect.centerX() - 35f,    // 负数往左
+//					rect.centerY() - 15f,    // 负数往上
+//					mPaint
+//			);
+//		}
+		String cycleTime;
+		mMarkersList = mLunarView.getMarkerList();
+		if (mMarkersList != null) {
+			System.out.println("list size:" + mMarkersList.size());
+			for (String marker : mMarkersList) {
+				for (int i = 0; i < weeks; i++) {
+					for (int j = 0; j < DAYS_IN_WEEK; j++) {
+						// 将当前日期 MonthDay 转换成字符串
+						cycleTime = transformMonthdayToString(mMonth.getMonthDay(i, j));
+						if (marker.equals(cycleTime)) {
+							//						画小星星
+							canvas.drawBitmap(
+									getImageFromAssetsFile("pic.png"),
+									monthRegion[i][j].getBounds().centerX() - 35f,	// 负数往左
+									monthRegion[i][j].getBounds().centerY() - 15f,	// 负数往上
+									mPaint
+							);
+						}
 					}
 				}
 			}
 		}
-
-//		Date myDate = null;
-//		try {
-//			myDate = dateFormat.parse("2015-11-30");
-//		}catch (Exception e){
-//			new IllegalArgumentException("date parse error");
-//		}
-//		Calendar calendar = Calendar.getInstance();
-//		calendar.setTime(myDate);
-//		String currTime = dateFormat.format(calendar.getTime());
-
-//		int selDayInMonth = mMonth.getIndexOfDayInCurMonth(markers.get(1));
-//		int calcuteIndex = 0;
 	}
 
 	private Bitmap getImageFromAssetsFile(String fileName) {
@@ -459,36 +443,7 @@ public class MonthView extends View {
 
 
 	private String transformMonthdayToString(MonthDay monthDay) {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		return dateFormat.format(monthDay.getCalendar().getTime());
-	}
-
-
-
-//		mPaint.setStyle(Paint.Style.STROKE);//空心矩形框
-//		canvas.drawRect(rect, mPaint);
-//		mPaint.setStyle(Paint.Style.FILL);//实心矩形框
-
-	// 单机和双击方法
-	private static long lastClickTime;
-	public static boolean isFastDoubleClick() {
-		long time = System.currentTimeMillis();
-		long timeD = time - lastClickTime;
-		if (0 < timeD && timeD < 500) {
-			return true;
-		}
-		lastClickTime = time;
-		return false;
-	}
-
-	public static boolean longClick() {
-		long time = System.currentTimeMillis();
-		long timeDuration = time - lastClickTime;
-		if (800 < timeDuration && timeDuration < 5000) {
-			return true;
-		}
-		lastClickTime = time;
-		return false;
+		return new SimpleDateFormat("yyyy-MM-dd").format(monthDay.getCalendar().getTime());
 	}
 
 	public int getCountWeekOfMonth() {

@@ -57,6 +57,7 @@ public class CalendarActivity extends Activity implements View.OnClickListener{
         mMarkers.add("2016-02-09");
         mMarkers.add("2016-02-15");
         mMarkers.add("2016-02-22");
+        mMarkers.add("2016-02-27");
         initData();
     }
 

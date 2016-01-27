@@ -1,3 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <!--cat_calendar_new.xml-->
+    <string name="act_calendar_tv_month">月</string>
+    <string name="act_calendar_tv_temp_month">11</string>
+    <string name="act_calendar_tv_temp_weekday">周五</string>
+    <string name="act_calendar_tv_temp_year">2016年</string>
+    <string name="act_calendar_tv_weekday_sun">日</string>
+    <string name="act_calendar_tv_weekday_mon">一</string>
+    <string name="act_calendar_tv_weekday_tue">二</string>
+    <string name="act_calendar_tv_weekday_wed">三</string>
+    <string name="act_calendar_tv_weekday_thu">四</string>
+    <string name="act_calendar_tv_weekday_fri">五</string>
+    <string name="act_calendar_tv_weekday_sat">六</string>
 </resources>

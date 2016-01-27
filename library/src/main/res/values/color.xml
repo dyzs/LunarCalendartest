@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--new add 7f:50%  cc:80%-->
+    <color name="calendar_normal_text_color">#ff7c7c7c</color>
+    <color name="calendar_normal_lunar_text_color">#7f7c7c7c</color>
+    <color name="calendar_weekends_solar_color">#e54f60</color>
+    <color name="calendar_click_solar_text_color">#ffffff</color>
+    <color name="calendar_click_lunar_text_color">#7fffffff</color>
+    <color name="calendar_click_item_color">#cce54f60</color>
+    <color name="calendar_divider">#e5e5e5</color>
+
+    <color name="calendar_weekday_label_spe">#e54f60</color>
+    <color name="calendar_weekday_label_nor">#7f7c7c7c</color>
+</resources>

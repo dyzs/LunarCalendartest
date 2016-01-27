@@ -1,0 +1,11 @@
+<resources>
+    <style name="calendar_weekday_label_item">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">@dimen/calendar_week_text_size</item>
+        <item name="android:text">@string/act_calendar_tv_weekday_sat</item>
+        <item name="android:textColor">@color/calendar_weekday_label_spe</item>
+    </style>
+</resources>

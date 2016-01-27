@@ -21,6 +21,8 @@ public class WeekLabelView extends View {
 	private static final String[] CHINESE_WEEK = {"日", "一", "二", "三", "四", "五", "六"};
 
 	private Paint mPaint;
+	private Paint mPaintLine;
+	private int widthSize;
 
 	/**
 	 * The constructor of week view.
@@ -57,13 +59,14 @@ public class WeekLabelView extends View {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-
 		Paint.FontMetrics fm = mPaint.getFontMetrics();
 		for (int i = 0; i < DAYS_IN_WEEK; i++) {
 			Rect rect = mWeekRegion[i].getBounds();
 			float centerY = rect.height() / 2 - fm.descent + (fm.descent - fm.ascent) / 2;
 			canvas.drawText(CHINESE_WEEK[i], rect.centerX(), centerY, mPaint);
 		}
+		// 绘制分割线？
+		// canvas.drawLines
 	}
 
 	/* init week view */
@@ -77,5 +80,8 @@ public class WeekLabelView extends View {
 			Region region = new Region();
 			mWeekRegion[i] = region;
 		}
+
+		mPaintLine = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG | Paint.LINEAR_TEXT_FLAG);
+		mPaintLine.setColor(Color.BLACK);
 	}
 }

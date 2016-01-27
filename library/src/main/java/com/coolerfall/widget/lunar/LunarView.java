@@ -1,7 +1,9 @@
 package com.coolerfall.widget.lunar;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -15,6 +17,7 @@ import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 
 
 /**
@@ -25,9 +28,13 @@ import java.util.Calendar;
  * @since Oct. 12, 2015
  */
 public class LunarView extends LinearLayout {
-	private int mSolarTextColor = 0xff454545;			// 当前月份的日期的颜色，除了周六日以外
-	private int mLunarTextColor = Color.GRAY;			// 农历文本颜色
-	private int mHightlistColor = 0xff03a9f4;			// 仅周六日日期字体颜色
+	private Resources res = getContext().getResources();
+	// 当前月份的日期的颜色，除了周六日以外
+	private int mSolarTextColor = res.getColor(R.color.calendar_normal_text_color);
+	// 农历文本颜色
+	private int mLunarTextColor = res.getColor(R.color.calendar_normal_lunar_text_color);
+	// 仅周六日日期字体颜色
+	private int mHightlistColor = res.getColor(R.color.calendar_weekends_solar_color);
 	private int mUncheckableColor = 0xffb0b0b0;			// 特殊节假日字体颜色，上月下月的字体颜色
 	private int mMonthBackgroundColor = 0xfffafafa;		// 日期面板背景颜色
 	private int mWeekLabelBackgroundColor = Color.WHITE; 	// 0xfffafafa;	// 周一到周五的导航条
@@ -36,10 +43,11 @@ public class LunarView extends LinearLayout {
 
 	private ViewPager mPager;
 	private MonthPagerAdapter mAdapter;					// 日历数据
-	private WeekLabelView mWeekLabelView;				// 显示顶部的 week lable
+	private WeekLabelView mWeekLabelView;				// 显示顶部的 week label
 	private OnDatePickListener mOnDatePickListener;		// 日期选择监听
-	private boolean mIsChangedByUser;
 	private int mCurrentPager = 0;//1393;
+
+	public Bitmap litterStar;	// 初始化小星星
 
 	public LunarView(Context context) {
 		this(context, null);
@@ -67,13 +75,7 @@ public class LunarView extends LinearLayout {
 					measureWidth, MeasureSpec.EXACTLY);
 			child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
 		}
-		int measureHeight = (int) (measureWidth * 6f / 7f) + mWeekLabelView.getMeasuredHeight();
-//		int countWeekOfMonth = mAdapter.getMonthWeekByPosition(mPager.getCurrentItem());
-//		if (countWeekOfMonth == 6) {
-//			measureHeight = (int) (measureWidth * 6f / 7f) + mWeekLabelView.getMeasuredHeight();
-//		} else {
-//			measureHeight = (int) (measureWidth * 5f / 7f) + mWeekLabelView.getMeasuredHeight();
-//		}
+		int measureHeight = (int) (measureWidth * 6f / 7f);// + mWeekLabelView.getMeasuredHeight();
 		setMeasuredDimension(measureWidth, measureHeight);
 	}
 
@@ -101,16 +103,16 @@ public class LunarView extends LinearLayout {
 			setClipChildren(true);
 			setClipToPadding(true);
 		}
-
 		/* set the orientation to vertical */
-		setOrientation(VERTICAL);
+//		setOrientation(VERTICAL);
+//
+//		mWeekLabelView = new WeekLabelView(getContext());
+//		mWeekLabelView.setBackgroundColor(mWeekLabelBackgroundColor);
+//
+//		addView(mWeekLabelView);
 
-		mWeekLabelView = new WeekLabelView(getContext());
-		mWeekLabelView.setBackgroundColor(mWeekLabelBackgroundColor);
-
-		addView(mWeekLabelView);
-
-		// 待添加 top lable 的下划线
+//		// 待添加 week label 的下划线
+//		mWeekLabelLine = new View(getContext());
 
 		mPager = new ViewPager(getContext());
 		mPager.setOffscreenPageLimit(1);
@@ -134,9 +136,12 @@ public class LunarView extends LinearLayout {
 		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 //			if (mMarkerDataList != null) {
 //				System.out.println("mAdapter count:" + mAdapter.getCount());
-//				System.out.println("传递标记日期字符串aaaa" + mMarkerDataList.size());
+//				System.out.println("传递一个参数:表示要绘制marker，然后invalidate（）");
 //				mAdapter.setMarkerDay(1391, 31);
 //			}
+			// 传递一个参数
+			// boolean showMarker = true;
+			// invalidate();
 		}
 
 		@Override
@@ -473,6 +478,17 @@ public class LunarView extends LinearLayout {
 	public ArrayList<String> getMarkerList() {
 		if (mMarkerDataList != null) {
 			return mMarkerDataList;
+		}
+		return null;
+	}
+
+	private HashMap<String, Integer> mHmMarker;
+	public void setHmMarker(HashMap<String, Integer> hm) {
+		this.mHmMarker = hm;
+	}
+	public HashMap<String, Integer> getHnMarker() {
+		if (mHmMarker != null) {
+			return mHmMarker;
 		}
 		return null;
 	}

@@ -1,38 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/ll_act_photo_edit"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    android:orientation="vertical"
-    >
+    android:orientation="vertical">
 
+    <!--topToolBar-->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
-        <ImageView
-            android:id="@+id/iv_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <TextView
-
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-
-            />
-
-
+        <!--<ImageView-->
+            <!--android:id="@+id/iv_back"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:src="@drawable/btn_back_selector" />-->
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_centerInParent="true"-->
+            <!--android:text="@string/calendar"-->
+            <!--android:textSize="@dimen/text_size_title" />-->
     </RelativeLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.4dp"
+        android:background="@color/common_divider"/>
     <RelativeLayout
         android:background="#f2f2f2"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        >
         <TextView
             android:id="@+id/tv_date"
             android:layout_width="wrap_content"
@@ -40,7 +41,7 @@
             android:layout_centerInParent="true"
             android:layout_gravity="center_horizontal"
             android:layout_margin="@dimen/activity_vertical_margin"
-
+            android:textColor="@color/common_text_color"
             android:textSize="18sp" />
 
         <ImageView
@@ -48,7 +49,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:layout_toLeftOf="@id/tv_date"
             android:src="@drawable/btn_to_last_selector" />
 
@@ -57,58 +58,100 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_toRightOf="@id/tv_date"
             android:src="@drawable/btn_to_next_selector" />
     </RelativeLayout>
 
+    <!--calendar_top_panel-->
+    <RelativeLayout
+        android:id="@+id/act_calendar_top_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        >
+        <TextView
+            android:id="@+id/tv_big_solar_month"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="53dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginBottom="20dp"
+            android:gravity="center"
+            android:text="@string/act_calendar_tv_temp_month"
+            android:textSize="@dimen/calendar_big_solar_month_text_size"
+            />
+        <TextView
+            android:id="@+id/tv_big_lunar_month"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="56dp"
+            android:layout_toRightOf="@+id/tv_big_solar_month"
+            android:text="@string/act_calendar_tv_month"
+            android:textSize="@dimen/calendar_big_lunar_month_text_size"
+            />
+        <TextView
+            android:id="@+id/tv_calendar_weekday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="64dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginBottom="2dp"
+            android:text="@string/act_calendar_tv_temp_weekday"
+            android:textSize="@dimen/calendar_lunar_text_size"
+            android:textColor="@color/calendar_normal_text_color"
+            android:layout_toRightOf="@+id/tv_big_lunar_month"
+
+            />
+        <TextView
+            android:id="@+id/tv_calendar_year"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:text="@string/act_calendar_tv_temp_year"
+            android:textSize="@dimen/calendar_lunar_text_size"
+            android:textColor="@color/calendar_normal_text_color"
+            android:layout_toRightOf="@+id/tv_big_lunar_month"
+            android:layout_below="@+id/tv_calendar_weekday"
+            />
+
+        <ImageView
+            android:layout_width="155dp"
+            android:layout_height="88dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="10dp"
+            android:background="@mipmap/calendar_illustration"
+            android:layout_alignParentRight="true"
+            />
+    </RelativeLayout>
+    <!--添加 weekday label-->
+    <include layout="@layout/layout_act_calendar_weekday_label" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@color/calendar_divider"/>
+    <!--calendar_content_panel-->
     <com.coolerfall.widget.lunar.LunarView
         android:id="@+id/lunar_view_main"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-    <LinearLayout
-        android:id="@+id/ll_calendar_marker_event_panel"
-        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:visibility="invisible"
-        android:orientation="horizontal"
-        >
-        <TextView
-            android:id="@+id/tv_add"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="添加标记记录"
-            android:gravity="center"
-            android:drawableTop="@mipmap/btn_add"
-            />
-        <TextView
-            android:id="@+id/tv_del"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="del_one"
-            android:gravity="center"
-            android:drawableTop="@mipmap/btn_add"
-            />
-        <TextView
-            android:id="@+id/del_all"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="么么哒,del_all"
-            android:gravity="center"
-            android:drawableTop="@mipmap/btn_add"
-            />
-    </LinearLayout>
-    <ListView
-        android:id="@+id/lv_calendarlist_lunar"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
-
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
         />
-
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="3dp"
+        android:background="@color/calendar_divider"/>
+    <!--<ListView-->
+    <!--android:id="@+id/lv_calendar_list_lunar"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:layout_width="match_parent"-->
+    <!--/>-->
 </LinearLayout>

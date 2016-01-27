@@ -22,6 +22,7 @@ public class MonthPagerAdapter extends PagerAdapter {
 	private Month mMinMonth;	// 最小月份，从1900开始
 	private Month mMaxMonth;	// 最大月份，到2100结束
 	private SparseIntArray mSelectedDayCache = new SparseIntArray();
+	private SparseIntArray mSelectedMarkerDayCache = new SparseIntArray();
 	private SparseArrayCompat<Month> mMonthCache = new SparseArrayCompat<>();
 	private SparseArrayCompat<MonthView> mViewCache = new SparseArrayCompat<>();
 
@@ -176,6 +177,27 @@ public class MonthPagerAdapter extends PagerAdapter {
 		notifyDataSetChanged();
 	}
 
+
+//	protected void setMarkerDay(ArrayList<String> markers) {
+//		MonthView monthView = mViewCache.get(pagerPosition);
+//		if (monthView == null) {
+//			mSelectedMarkerDayCache.put(pagerPosition, markerDay);
+//			return;
+//		}
+//		monthView.setMarkerDay(markerDay);
+//	}
+
+	// 利用marker转换成 pagerPosition
+	protected void setMarkerDay(int pagerPosition, int markerDay) {
+		MonthView monthView = mViewCache.get(pagerPosition);
+		if (monthView == null) {
+			mSelectedMarkerDayCache.put(pagerPosition, markerDay);
+			 return;
+		}
+		monthView.setMarkerDay(markerDay);
+
+	}
+
 	protected void removeOneMarker(int pagerPosition, String marker) {
 		MonthView monthView = mViewCache.get(pagerPosition);
 		if (monthView == null) {
@@ -183,8 +205,6 @@ public class MonthPagerAdapter extends PagerAdapter {
 		}
 		monthView.removeOneMarker(marker);
 	}
-
-
 	protected void addOneMarker(int pagerPosition, String marker) {
 		MonthView monthView = mViewCache.get(pagerPosition);
 		if (monthView == null) {

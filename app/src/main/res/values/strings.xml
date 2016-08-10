@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Lunartest</string>
+    <string name="app_name">日历LunarView</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>

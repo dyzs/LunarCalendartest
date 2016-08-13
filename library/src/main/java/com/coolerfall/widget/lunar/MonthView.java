@@ -12,7 +12,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -109,7 +108,6 @@ public class MonthView extends View {
 
 		mSolarOffset = mLunarOffset - lunarHeight - 2f;
 		mMarkerOffset = mLunarOffset;	// maidou add
-
 		initMonthRegion(mMonthWithFourWeeks, dayWidth, dayHeightInFourWeek);
 		initMonthRegion(mMonthWithFiveWeeks, dayWidth, dayHeightInFiveWeek);
 		initMonthRegion(mMonthWithSixWeeks, dayWidth, dayHeightInSixWeek);
@@ -136,9 +134,11 @@ public class MonthView extends View {
 		if (mMonth == null) {
 			return;
 		}
+		mMarkerHm = mLunarView.getHnMarker();
 		canvas.save();
 		int weeks = mMonth.getWeeksInMonth();
 		Region[][] monthRegion = getMonthRegion();
+		Bitmap dateBit = null;
 		for (int i = 0; i < weeks; i++) {
 			for (int j = 0; j < DAYS_IN_WEEK; j++) {
 				draw(canvas, monthRegion[i][j].getBounds(), i, j);
@@ -146,8 +146,10 @@ public class MonthView extends View {
 				if (mMarkerHm != null) {
 					String date = transformMonthDayToString(mMonth.getMonthDay(i, j));
 					if (mMarkerHm.containsKey(date)) {
+						if (dateBit != null && dateBit.isRecycled()) {dateBit.recycle();}
+						dateBit = getImageFromDrawable(mMarkerHm.get(date));
 						canvas.drawBitmap(
-								getImageFromDrawable(mMarkerHm.get(date)),
+								dateBit,
 								monthRegion[i][j].getBounds().centerX() + 22f,	// 负数往左
 								monthRegion[i][j].getBounds().centerY() - 42f,	// 负数往上
 								mPaintLittleStar
@@ -194,11 +196,11 @@ public class MonthView extends View {
 		if (mMonth.isMonthOfToday()) {
 			mSelectedIndex = mMonth.getIndexOfToday();
 		}
-		// System.out.println("MonthView method init() getIndexOfToday mSelectedIndex:" + mSelectedIndex);
+
 		setBackgroundColor(mLunarView.getMonthBackgroundColor());
-		// bitmapStar = getImageFromDrawable(2);
-		// mMarkersList = mLunarView.getMarkerList();
-		mMarkerHm = mLunarView.getHnMarker();
+//		bitmapStar = getImageFromDrawable(2);
+//		mMarkersList = mLunarView.getMarkerList();
+//		mMarkerHm = mLunarView.getHnMarker();
 	}
 
 	/* init month region with the width and height of day */
@@ -471,7 +473,7 @@ public class MonthView extends View {
 	public static final int TYPE_STAR_SILVER = 1;
 	public static final int TYPE_STAR_GOLDEN_NORMAL = 2;
 	public static final int TYPE_STAR_GOLDEN_SPECIAL = 3;
-	private static final int stars[] = {R.mipmap.pic_startsilvery, R.mipmap.pic_startgolden};
+	private static final int stars[] = {R.mipmap.pic_star_silvery, R.mipmap.pic_star_golden};
 	private Bitmap getImageFromDrawable(int starType) {
 		Bitmap image = null;
 		switch (starType){
@@ -519,4 +521,13 @@ public class MonthView extends View {
 		return mMonth.getWeeksInMonth();
 	}
 
+	public void callRefresh(int day) {
+		if (mMonth.isMonthOfToday() && day == 0) {
+			mSelectedIndex = mMonth.getIndexOfToday();
+		} else {
+			int selectedDay = day == 0 ? 1 : day;
+			mSelectedIndex = mMonth.getIndexOfDayInCurMonth(selectedDay);
+		}
+		invalidate();
+	}
 }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -43,11 +44,13 @@ public class LunarView extends LinearLayout {
 
 	private ViewPager mPager;
 	private MonthPagerAdapter mAdapter;					// 日历数据
-	private WeekLabelView mWeekLabelView;				// 显示顶部的 week label
+	// private WeekLabelView mWeekLabelView;				// 显示顶部的 week label
 	private OnDatePickListener mOnDatePickListener;		// 日期选择监听
 	private int mCurrentPager = 0;//1393;
 
-	public Bitmap litterStar;	// 初始化小星星
+	public Bitmap litterStar_silvery;	// 初始化小星星
+	public Bitmap litterStar_golden;
+	public static final int STARTS[] = {R.mipmap.pic_star_silvery, R.mipmap.pic_star_golden};
 
 	public LunarView(Context context) {
 		this(context, null);
@@ -76,6 +79,7 @@ public class LunarView extends LinearLayout {
 			child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
 		}
 		int measureHeight = (int) (measureWidth * 6f / 7f);// + mWeekLabelView.getMeasuredHeight();
+
 		setMeasuredDimension(measureWidth, measureHeight);
 	}
 
@@ -94,6 +98,9 @@ public class LunarView extends LinearLayout {
 		mShouldPickOnMonthChange = a.getBoolean(R.styleable.LunarView_shouldPickOnMonthChange, mShouldPickOnMonthChange);
 		a.recycle();
 
+		litterStar_silvery = BitmapFactory.decodeResource(getResources(), STARTS[0]);
+		litterStar_golden = BitmapFactory.decodeResource(getResources(), STARTS[1]);
+
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
 			/* if we're on good Android versions, turn off clipping for cool effects */
 			setClipToPadding(false);
@@ -110,7 +117,7 @@ public class LunarView extends LinearLayout {
 //		mWeekLabelView.setBackgroundColor(mWeekLabelBackgroundColor);
 //
 //		addView(mWeekLabelView);
-
+//
 //		// 待添加 week label 的下划线
 //		mWeekLabelLine = new View(getContext());
 
@@ -123,12 +130,12 @@ public class LunarView extends LinearLayout {
 		mPager.setAdapter(mAdapter);
 		mPager.addOnPageChangeListener(mPageListener);
 		mPager.setCurrentItem(mAdapter.getIndexOfCurrentMonth());
-//		mPager.setPageTransformer(false, new ViewPager.PageTransformer() {
-//			@Override
-//			public void transformPage(View page, float position) {
-//				page.setAlpha(1 - Math.abs(position));
-//			}
-//		});
+		mPager.setPageTransformer(false, new ViewPager.PageTransformer() {
+			@Override
+			public void transformPage(View page, float position) {
+				page.setAlpha(1 - Math.abs(position));
+			}
+		});
 	}
 	/* page change listener */
 	private ViewPager.OnPageChangeListener mPageListener = new ViewPager.OnPageChangeListener() {
@@ -146,20 +153,23 @@ public class LunarView extends LinearLayout {
 
 		@Override
 		public void onPageSelected(int position) {
+			System.out.println("onPageSelected");
+			if (mPageSelectedListener != null) {
+				mPageSelectedListener.resetMarkerData(position);
+			}
 			mCurrentPager = position;
 			mInterceptFirstTimeDatePick = true;
 			mAdapter.resetSelectedDay(position);
 
 			// 页面加载完成，获取数据咯
 			// 获取 marker 然后循环遍历日历 marker
-			// TODO 临时 marker
+			// 临时 marker
 //			mAdapter.setMarkerDay(1392, 10);
-
+//			invalidate();
 		}
 
 		@Override
 		public void onPageScrollStateChanged(int state) {
-			// System.out.println("onPageScrollStateChanged");
 		}
 	};
 
@@ -386,7 +396,7 @@ public class LunarView extends LinearLayout {
 		mAdapter.setSelectedDay(position, selectedDay);
 		mPager.setCurrentItem(position, true);
 
-		System.out.println("showMonth Page Position:" + position);
+		// System.out.println("showMonth Page Position:" + position);
 
 		invalidate();
 	}
@@ -471,10 +481,13 @@ public class LunarView extends LinearLayout {
 		mAdapter.setDateRange(min, max);
 	}
 
+	@Deprecated
 	private ArrayList<String> mMarkerDataList;
+	@Deprecated
 	public void setMarkerList(ArrayList<String> list) {
 		this.mMarkerDataList = list;
 	}
+	@Deprecated
 	public ArrayList<String> getMarkerList() {
 		if (mMarkerDataList != null) {
 			return mMarkerDataList;
@@ -491,6 +504,30 @@ public class LunarView extends LinearLayout {
 			return mHmMarker;
 		}
 		return null;
+	}
+
+	public int getCurrentMonth() {
+		return mPager.getCurrentItem();
+	}
+
+	public String getStringMonth() {
+		int year = 1900 + mPager.getCurrentItem() / 12;
+		int month = mPager.getCurrentItem() % 12 + 1;
+//		System.out.println("year:" + year + "/month:" + month);
+		return year + "-" + month + "-01";
+	}
+
+	public void callRefresh() {
+		Calendar today = Calendar.getInstance();
+		today.setTimeInMillis(System.currentTimeMillis());
+		int position;
+		if (mCurrentPager == 0) {
+			position = mAdapter.getIndexOfCurrentMonth();
+		} else {
+			position = mCurrentPager;
+		}
+		mAdapter.callRefresh(position, today.get(Calendar.DAY_OF_MONTH));
+		// mPager.setCurrentItem(position, true);
 	}
 
 //	/**
@@ -533,5 +570,12 @@ public class LunarView extends LinearLayout {
 	public void setInterceptFirstTimeDatePick(boolean b) {
 		this.mInterceptFirstTimeDatePick = b;
 	}
-}
 
+	public interface onPageSelectedListener {
+		void resetMarkerData(int position);
+	}
+	private onPageSelectedListener mPageSelectedListener;
+	public void setOnPageSelectedListener(onPageSelectedListener listener) {
+		this.mPageSelectedListener = listener;
+	}
+}

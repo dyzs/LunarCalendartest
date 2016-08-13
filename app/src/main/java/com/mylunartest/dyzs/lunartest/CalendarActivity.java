@@ -115,9 +115,24 @@ public class CalendarActivity extends Activity implements View.OnClickListener{
                 String dateFormat = String.format("%d-%d-%d", year, month, day);
             }
         });
+
+
+        // 初始化加载时调用一次, 因为在 pageSelected 的时候会预先 invalidate, 所以不需要加载 callRefresh 方法
+        String today = DateUtil.getCurrentDate();
+        parseAsyncData(DateUtil.getMonthTimeMillisOffset(today, -1), System.currentTimeMillis());
+        mLunarView.setOnPageSelectedListener(new LunarView.onPageSelectedListener() {
+            @Override
+            public void resetMarkerData(int position) {
+                String year = DateUtil.getYearByAdapterPos(position);
+                String month = DateUtil.getMonthByAdapterPos(position);
+                long fromTime = DateUtil.getMonthTimeMillisOffset(year, month, null, -1);// 当前月的上一月
+                long toTime = DateUtil.getMonthTimeMillisOffset(year, month, null, 2);   // 当前月的两月
+                parseAsyncData(fromTime, toTime);
+            }
+        });
     }
 
-    private void parseAsyncData() {
+    private void parseAsyncData(long fTime, long tTime) {
         Date d1 = new Date();
         d1.setYear(2014 - 1900);
         d1.setMonth(10);

@@ -37,7 +37,7 @@ public class MonthPagerAdapter extends PagerAdapter {
 		mLunarView = lunarView;
 
 		mMinMonth = new Month(1900, 0, 1);
-		mMaxMonth = new Month(2100, 12, 1);
+		mMaxMonth = new Month(2100, 11, 1);
 
 		calculateRange(mMinMonth, mMaxMonth);
 	}
@@ -195,7 +195,15 @@ public class MonthPagerAdapter extends PagerAdapter {
 			 return;
 		}
 		monthView.setMarkerDay(markerDay);
+	}
 
+	protected void callRefresh(int pagerPosition, int day) {
+		MonthView monthView = mViewCache.get(pagerPosition);
+//		if (monthView == null) {
+//			// mSelectedMarkerDayCache.put(pagerPosition, markerDay);
+//			return;
+//		}
+		monthView.callRefresh(day);
 	}
 
 	protected void removeOneMarker(int pagerPosition, String marker) {
